@@ -1,0 +1,33 @@
+# dependencies
+node_modules
+
+# output
+out
+dist
+*.tgz
+
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
+_.log
+report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+
+# environment variable files
+.env
+
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# vscode
+.vscode
+
+# Finder (MacOS)
+.DS_Store
+
+# project shtuff
+private
