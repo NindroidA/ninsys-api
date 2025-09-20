@@ -2,18 +2,19 @@
 node_modules
 
 # output
-out
-dist
-*.tgz
+dist/
+build/
 
 # code coverage
 coverage
 *.lcov
 
 # logs
-logs
-_.log
-report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+logs/
+*.log
+npm-debug.log*
+bun-debug.log*
+bun-error.log*
 
 # environment variable files
 .env
@@ -23,11 +24,19 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .cache
 *.tsbuildinfo
 
+# PM2
+pids/
+logs/
+pm2.json
+
 # vscode
 .vscode
 
 # Finder (MacOS)
 .DS_Store
 
-# project shtuff
-private
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
