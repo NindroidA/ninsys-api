@@ -1,3 +1,6 @@
+# NinSys-API v1.1.4
+- Added API key validation for Nindroid Systems Terminal.
+
 # NinSys-API v1.1.3
 - Added GitHub workflow to deploy to homelab.
 - And fixed small deploy bugs.
