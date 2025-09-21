@@ -4,9 +4,9 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { ApiResponse } from '../types/api.ts';
-import { CogworksStats, CogworksInfo, CogworksStatus, CogworksCommandInfo, CogworksUptimeInfo, CogworksDataStore } from '../types/cogworks.ts';
-import { DiscordService } from '../services/discordService.ts';
+import { ApiResponse } from '../types/api.js';
+import { CogworksStats, CogworksInfo, CogworksStatus, CogworksCommandInfo, CogworksUptimeInfo, CogworksDataStore } from '../types/cogworks.js';
+import { DiscordService } from '../services/discordService.js';
 
 /* In-memory bot data store */
 let botData: CogworksDataStore = {

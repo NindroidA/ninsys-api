@@ -3,7 +3,7 @@
  * @description Configuration constants, device groupings, and lighting presets for Govee smart light integration.
  */
 
-import { DeviceGroup, LightPreset } from '../types/govee.ts';
+import { DeviceGroup, LightPreset } from '../types/govee.js';
 
 /* Base URL for Govee API endpoints */
 export const GOVEE_BASE_URL = 'https://openapi.api.govee.com/router/api/v1';

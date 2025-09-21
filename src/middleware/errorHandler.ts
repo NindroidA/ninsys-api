@@ -4,8 +4,8 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { ApiResponse } from '../types/api.ts';
-import { logger } from '../utils/logger.ts';
+import { ApiResponse } from '../types/api.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * Global error handling middleware for Express.
