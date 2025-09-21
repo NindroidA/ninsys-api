@@ -1,4 +1,9 @@
-# NinSys-API V1.1.1
+# NinSys-API v1.1.2
+- Updated package json scripts -- using npm for production.
+- Update pm2 config to use npm.
+- Converted pm2 config to ES module.
+
+# NinSys-API v1.1.1
 - Fixed inconsistent group namings for devices (I just forgor to change them lol).
 - Fixed actual Govee API handling.
 
