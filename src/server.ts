@@ -8,7 +8,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import { version, description } from '../package.json' with { type: 'json' };
+import { version } from '../package.json' with { type: 'json' };
 
 import { GoveeService } from './services/goveeService.js';
 import { DiscordService } from './services/discordService.js';
@@ -90,7 +90,7 @@ app.get('/', (req, res) => {
     data: {
       name: 'Nindroid Systems API',
       version,
-      description,
+      description: 'API for Nindroid Systems projects',
       runtime: 'node',
       endpoints: {
         // System endpoints
