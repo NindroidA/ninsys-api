@@ -8,7 +8,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import { version, description } from '../package.json';
+import { version, description } from '../package.json' with { type: 'json' };
 
 import { GoveeService } from './services/goveeService.js';
 import { DiscordService } from './services/discordService.js';
@@ -91,7 +91,7 @@ app.get('/', (req, res) => {
       name: 'Nindroid Systems API',
       version,
       description,
-      runtime: 'Bun',
+      runtime: 'node',
       endpoints: {
         // System endpoints
         health: '/health',
@@ -146,7 +146,7 @@ app.use((req, res) => {
 /* Start HTTP server -- logs startup info and initializes Govee devices */
 app.listen(PORT, () => {
   logger.info(`📡 Nindroid Systems API running on port ${PORT}`);
-  logger.info(`⚡ Runtime: Bun ${Bun.version}`);
+  logger.info(`⚡ Runtime: Node`);
   logger.info(`🔧 Environment: ${process.env.NODE_ENV!}`);
   logger.info(`📝 CORS enabled for: ${allowedOrigins.join(', ')}`);
   
