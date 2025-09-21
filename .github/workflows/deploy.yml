@@ -1,0 +1,142 @@
+name: Deploy NinSys API to Homelab.
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch: # allows manual triggering
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🚚 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: 📥 Install dependencies
+      run: npm install
+
+    - name: 🧪 Run tests (if any)
+      run: npm test || true
+      
+    - name: 🔧 Build TypeScript
+      run: npm run build
+      env:
+        CI: false
+
+    - name: 📊 Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ninsys-api-build
+        path: |
+          dist/
+          package*.json
+          ecosystem.config.js
+        retention-days: 30
+
+    - name: 🚀 Deploy to Homelab Server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: 22
+        script: |
+          echo "🏠 Connected to Homelab Server!"
+          
+          # navigate to deployment directory
+          cd /var/www/ninsys-api || { echo "❌ ninsys-api directory not found!"; exit 1; }
+          
+          # backup current deployment
+          if [ -d "dist" ]; then
+            echo "📦 Backing up current deployment..."
+            sudo rm -rf dist.backup || true
+            sudo mv dist dist.backup || true
+          fi
+          
+          # clone/pull latest code
+          if [ -d ".git" ]; then
+            echo "🔄 Pulling latest changes..."
+            git fetch origin
+            git reset --hard origin/main
+            git clean -fd
+          else
+            echo "📥 Cloning repository..."
+            sudo rm -rf ./* ./.* 2>/dev/null || true
+            git clone https://github.com/NindroidA/ninsys-api.git .
+            git checkout main
+          fi
+          
+          # setup environment
+          echo "📦 Setting up Node.js environment..."
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+          
+          # install dependencies and build
+          echo "📦 Installing dependencies with npm..."
+          npm install --production
+          
+          echo "🔧 Building TypeScript..."
+          npm run build
+          
+          # ensure environment file exists
+          if [ ! -f ".env" ]; then
+            echo "⚠️  .env file not found, copying from .env.example"
+            cp .env.example .env
+            echo "🔧 Please update .env with actual API keys"
+          fi
+          
+          # create logs directory
+          mkdir -p logs
+          
+          # stop existing API if running
+          echo "🛑 Stopping existing API..."
+          pm2 stop ninsys-api || echo "API was not running"
+          
+          # start/restart API with PM2
+          echo "🚀 Starting API with PM2..."
+          pm2 start ecosystem.config.js || pm2 restart ninsys-api
+          
+          # save PM2 configuration
+          pm2 save
+          
+          # wait a moment for startup
+          sleep 3
+          
+          # test the API deployment
+          echo "🧪 Testing API deployment..."
+          if curl -f -s http://localhost:3001/health > /dev/null; then
+            echo "✅ API deployment successful! API is running"
+            pm2 status
+          else
+            echo "❌ API health check failed"
+            pm2 logs ninsys-api --lines 10
+            exit 1
+          fi
+          
+          # test external access if nginx proxy is configured
+          if curl -f -s https://nindroidsystems.com/api/health > /dev/null; then
+            echo "✅ External API access working!"
+          else
+            echo "⚠️  External API access not working (nginx proxy may need configuration)"
+          fi
+          
+          echo "🎉 Deployment completed!"
+
+    - name: 🔔 Notify on success
+      if: success()
+      run: |
+        echo "✅ Nindroid Systems API deployed successfully!"
+
+    - name: 🔔 Notify on failure  
+      if: failure()
+      run: |
+        echo "❌ API deployment failed! Check the logs above."

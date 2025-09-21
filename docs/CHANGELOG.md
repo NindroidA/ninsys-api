@@ -1,3 +1,6 @@
+# NinSys-API v1.1.3
+- Added GitHub workflow to deploy to homelab.
+
 # NinSys-API v1.1.2
 - Updated package json scripts -- using npm for production.
 - Update pm2 config to use npm.
