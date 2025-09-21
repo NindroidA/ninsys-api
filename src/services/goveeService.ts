@@ -153,18 +153,36 @@ export class GoveeService {
       ...group,
       devices: this.devices.filter(device => {
         switch (group.id) {
-          case 'fan-lights':
-            return device.model === 'H6004' && device.deviceName.includes('Fan Light');
-          case 'gaming-setup':
+          case 'light-bulbs':
+            return device.model === 'H6004' && (device.deviceName.includes('Fan Light') || device.deviceName.includes('Window'));
+          case 'light-bars':
             return device.model === 'H6047';
-          case 'ambient-lighting':
-            return device.model === 'H619B' || 
-                  (device.model === 'H6004' && device.deviceName.includes('Window'));
+          case 'light-strips':
+            return device.model === 'H619B';
           default:
             return false;
         }
       })
     }));
+  }
+
+  /**
+   * Helper method to map Govee capability type names to their corresponding instance names
+   * 
+   * @param {string} commandType - The capability type (e.g., 'devices.capabilities.on_off')
+   * @returns {string} The corresponding Govee instance name (e.g., 'powerSwitch')
+   */
+  private getInstanceName(commandType: string): string {
+    switch (commandType) {
+      case 'devices.capabilities.on_off':
+        return 'powerSwitch';
+      case 'devices.capabilities.range':
+        return 'brightness';
+      case 'devices.capabilities.color_setting':
+        return 'colorRgb'; // or 'colorTemperatureK'
+      default:
+        return 'powerSwitch'; // fallback
+    }
   }
 
   /**
@@ -176,7 +194,20 @@ export class GoveeService {
    */
   async controlDevice(request: GoveeControlRequest): Promise<GoveeControlResponse> {
     try {
-      const response = await this.client.put<GoveeControlResponse>('/device/control', request);
+      const goveeRequest = {
+        requestId: `req-${Date.now()}`, // generate unique request ID
+        payload: {
+          sku: request.model,
+          device: request.device,
+          capability: {
+            type: request.cmd.name,
+            instance: this.getInstanceName(request.cmd.name),
+            value: request.cmd.value
+          }
+        }
+      };
+
+      const response = await this.client.post<GoveeControlResponse>('/device/control', goveeRequest);
       
       if (response.data.code !== 200) {
         throw new Error(`Govee control error: ${response.data.message}`);
@@ -184,7 +215,7 @@ export class GoveeService {
 
       logger.info(`Device control successful: ${request.device} - ${request.cmd.name}`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to control Govee device:', error);
       throw error;
     }

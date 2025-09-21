@@ -40,3 +40,6 @@ pids
 *.pid
 *.seed
 *.pid.lock
+
+# Project
+private/
