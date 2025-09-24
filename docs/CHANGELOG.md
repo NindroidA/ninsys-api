@@ -1,7 +1,7 @@
 # NinSys-API v1.2.0
 - Added authentication middleware and routes.
 - Removed API key validator logic (replaced with auth middleware).
-- Fixed small GitHub workflow bug.
+- Fixed a few small GitHub workflow bug.
 
 # NinSys-API v1.1.5
 - Added support for more Govee devices.
