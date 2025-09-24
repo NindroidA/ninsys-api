@@ -19,9 +19,9 @@ import { createGoveeRoutes } from './routes/govee.js';
 import { generalLimiter } from './middleware/rateLimiter.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { logger } from './utils/logger.js';
-import { authService, AuthService } from './services/authService';
-import { createAuthRoutes } from './routes/auth';
-import { requireAuth } from './middleware/authHandler';
+import { authService } from './services/authService.js';
+import { createAuthRoutes } from './routes/auth.js';
+import { requireAuth } from './middleware/authHandler.js';
 
 // load env vars from .env file
 dotenv.config();

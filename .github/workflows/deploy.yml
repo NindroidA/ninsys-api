@@ -2,12 +2,21 @@ name: Deploy NinSys API to Homelab.
 
 on:
   push:
-    tags: [ 'v*' ]
-  workflow_dispatch: # allows manual triggering
+    branches: [ main ]
+    # only trigger on push if no tag was created
+  create:
+    # only trigger on tag creation
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
+    # deploy on: manual trigger, tag creation, or main branch push (but not both)
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'create' && github.event.ref_type == 'tag' && startsWith(github.event.ref, 'v')) ||
+      (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip ci]'))
     
     steps:
     - name: 🚚 Checkout repository
