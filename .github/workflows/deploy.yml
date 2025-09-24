@@ -2,7 +2,6 @@ name: Deploy NinSys API to Homelab.
 
 on:
   push:
-    branches: [ main ]
     tags: [ 'v*' ]
   workflow_dispatch: # allows manual triggering
 
