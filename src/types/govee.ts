@@ -64,10 +64,11 @@ export interface GoveeControlResponse {
  * @interface DeviceGroup
  */
 export interface DeviceGroup {
-  id: string;                      // uniquie group id
-  name: string;                    // group name
-  devices: GoveeDevice[];          // array of devices in this group
-  type: 'bulbs' | 'bar' | 'strip'; // group categories (for UI)
+  id: string;                           // uniquie group id
+  name: string;                         // group name
+  devices: GoveeDevice[];               // array of devices in this group
+  type:                                 // group categories (for UI)
+    'bulbs' | 'bar' | 'strip' | 'lamp'; 
 }
 
 /**

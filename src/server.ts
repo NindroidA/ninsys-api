@@ -95,8 +95,8 @@ app.get('/', (req, res) => {
       runtime: 'node',
       endpoints: {
         // System endpoints
-        health: '/health',
-        'health.cogworks-bot': '/health/cogowkrs-bot',
+        'health': '/health',
+        'health.cogworks-bot': '/health/cogworks-bot',
         
         // Cogworks Bot endpoints
         'cogworks.stats': '/api/cogworks/stats',

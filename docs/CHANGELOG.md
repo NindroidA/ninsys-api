@@ -1,3 +1,7 @@
+# NinSys-API v1.1.5
+- Added support for more Govee devices.
+- Fixed small spelling error for Cogworks Health endpoint.
+
 # NinSys-API v1.1.4
 - Added API key validation for Nindroid Systems Terminal.
 

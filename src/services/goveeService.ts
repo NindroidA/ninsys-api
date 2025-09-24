@@ -116,9 +116,9 @@ export class GoveeService {
 
       this.devices = response.data.data.map((device: any) => ({
         device: device.device,
-        model: device.sku, // Govee uses 'sku' instead of 'model'
+        model: device.sku,
         deviceName: device.deviceName,
-        controllable: true, // Assume controllable if it has capabilities
+        controllable: true, // assume controllable if it has capabilities
         retrievable: true,
         supportCmds: this.extractSupportedCommands(device.capabilities),
         properties: this.extractProperties(device.capabilities)
@@ -138,7 +138,7 @@ export class GoveeService {
 
   /**
    * Organize devices into logical groups based on model and name patterns.
-   * Groups include: light-bulbs (H6004 bulbs), light-bars (H6047), light-strips (H619B).
+   * Groups include: light-bulbs (H6004), light-bars (H6047), light-strips (H619B, H612F, H61C2), light-lamps (H8022).
    * 
    * @private
    */
@@ -158,7 +158,9 @@ export class GoveeService {
           case 'light-bars':
             return device.model === 'H6047';
           case 'light-strips':
-            return device.model === 'H619B';
+            return device.model === 'H619B' || 'H612F' || 'H61C2';
+          case 'light-lamps':
+            return device.model === 'H8022';
           default:
             return false;
         }

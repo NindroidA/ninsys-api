@@ -29,8 +29,14 @@ export const DEVICE_GROUPS: DeviceGroup[] = [
   {
     id: 'light-strips',
     name: 'Light Strips',
-    devices: [], // populated dynamically with H619B Light Strip
+    devices: [], // populated dynamically with H619B, H612F, and H61C2 Light Strips
     type: 'strip'
+  },
+  {
+    id: 'light-lamps',
+    name: 'Light Lamps',
+    devices: [], // populated dynaically with H8022 Table Lamp
+    type: 'lamp'
   }
 ];
 
@@ -41,13 +47,13 @@ export const DEVICE_GROUPS: DeviceGroup[] = [
  */
 export const LIGHT_PRESETS: LightPreset[] = [
   {
-    id: 'magenta-vibes',
+    id: 'magenta',
     name: 'Magenta Vibes',
     description: 'Cool magenta lighting for focus and creativity',
     commands: []
   },
   {
-    id: 'gaming-mode',
+    id: 'gaming',
     name: 'Gaming Mode',
     description: 'Dynamic RGB lighting for gaming sessions',
     commands: []
