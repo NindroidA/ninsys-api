@@ -8,7 +8,7 @@ import { ApiResponse } from '../types/api.js';
 import { GoveeDevice, DeviceGroup, LightPreset } from '../types/govee.js';
 import { GoveeService } from '../services/goveeService.js';
 import { goveeControlLimiter } from '../middleware/rateLimiter.js';
-import { validateApiKey } from '../middleware/keyValidator.js';
+import { requireAuth } from '../middleware/authHandler.js';
 
 /**
  * Create Govee smart light routes with service dependency.
@@ -19,8 +19,6 @@ import { validateApiKey } from '../middleware/keyValidator.js';
 export const createGoveeRoutes = (goveeService: GoveeService): Router => {
   const router = Router();
 
-  router.use(validateApiKey);
-
   /**
    * GET /api/govee/devices
    * Retrieve all Govee devices and their organized groups
@@ -30,7 +28,7 @@ export const createGoveeRoutes = (goveeService: GoveeService): Router => {
    * @returns {200} Devices retrieved successfully
    * @returns {500} Failed to fetch devices
    */
-  router.get('/devices', async (req: Request, res: Response<ApiResponse<{
+  router.get('/devices', requireAuth as any, async (req: Request, res: Response<ApiResponse<{
     devices: GoveeDevice[];
     groups: DeviceGroup[];
   }>>) => {
@@ -61,7 +59,7 @@ export const createGoveeRoutes = (goveeService: GoveeService): Router => {
    * @returns {200} Presets retrieved successfully
    * @returns {500} Failed to fetch presets
    */
-  router.get('/presets', (req: Request, res: Response<ApiResponse<LightPreset[]>>) => {
+  router.get('/presets', requireAuth as any, (req: Request, res: Response<ApiResponse<LightPreset[]>>) => {
     try {
       const presets = goveeService.getPresets();
       
@@ -97,7 +95,7 @@ export const createGoveeRoutes = (goveeService: GoveeService): Router => {
    * @returns {500} Device control failed
    * @returns {429} Rate limit exceeded
    */
-  router.put('/control', goveeControlLimiter, async (req: Request, res: Response<ApiResponse>) => {
+  router.put('/control', requireAuth as any, goveeControlLimiter, async (req: Request, res: Response<ApiResponse>) => {
     try {
       const { device, model, command } = req.body;
 
@@ -146,7 +144,7 @@ export const createGoveeRoutes = (goveeService: GoveeService): Router => {
    * @returns {500} Group control failed
    * @returns {429} Rate limit exceeded
    */
-  router.put('/control/group', goveeControlLimiter, async (req: Request, res: Response<ApiResponse>) => {
+  router.put('/control/group', requireAuth as any, goveeControlLimiter, async (req: Request, res: Response<ApiResponse>) => {
     try {
       const { groupId, command } = req.body;
 
@@ -190,7 +188,7 @@ export const createGoveeRoutes = (goveeService: GoveeService): Router => {
    * @returns {500} Device control failed
    * @returns {429} Rate limit exceeded
    */
-  router.put('/control/all', goveeControlLimiter, async (req: Request, res: Response<ApiResponse>) => {
+  router.put('/control/all', requireAuth as any, goveeControlLimiter, async (req: Request, res: Response<ApiResponse>) => {
     try {
       const { command } = req.body;
 
@@ -230,7 +228,7 @@ export const createGoveeRoutes = (goveeService: GoveeService): Router => {
    * @returns {500} Preset application failed
    * @returns {429} Rate limit exceeded
    */
-  router.put('/preset/:presetId', goveeControlLimiter, async (req: Request, res: Response<ApiResponse>) => {
+  router.put('/preset/:presetId', requireAuth as any, goveeControlLimiter, async (req: Request, res: Response<ApiResponse>) => {
     try {
       const { presetId } = req.params;
 

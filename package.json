@@ -19,8 +19,11 @@
     "@types/bun": "latest",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
-    "@types/node": "^24.5.2"
+    "@types/node": "^24.5.2",
+    "@types/qrcode": "^1.5.5",
+    "@types/speakeasy": "^2.0.10"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -32,7 +35,10 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
-    "reflect-metadata": "^0.2.2"
+    "qrcode": "^1.5.4",
+    "reflect-metadata": "^0.2.2",
+    "speakeasy": "^2.0.0"
   }
 }

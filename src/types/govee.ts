@@ -76,13 +76,19 @@ export interface DeviceGroup {
  * @interface LightPreset
  */
 export interface LightPreset {
-  id: string;           // unique preset id
-  name: string;         // preset name
-  description: string;  // description of lighting effect
-  commands: Array<{     // array of commands to execute for this preset
-    deviceId: string;   // target device id
-    model: string;      // target device model number
-    commands: Array<{   // commands to execute for this device
+  id: string;           
+  name: string;         
+  description: string;
+  // preset configuration
+  brightness: number;
+  groups: string[];
+  color?: number;       // RGB integer for color lights
+  colorTemp?: number;   // Kelvin temperature for white lights
+  // populated device commands
+  commands: Array<{     
+    deviceId: string;   
+    model: string;      
+    commands: Array<{   
       name: string;
       value: any;
     }>;

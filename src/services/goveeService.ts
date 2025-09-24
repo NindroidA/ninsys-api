@@ -18,6 +18,7 @@ export class GoveeService {
   private client: AxiosInstance;            // axios http client configured for Govee API
   private devices: GoveeDevice[] = [];      // cached array if discovered Govee devices
   private deviceGroups: DeviceGroup[] = []; // organized device groups for logical control
+  private populatedPresets: LightPreset[] = []; // presets with device commands populated
 
   /**
    * Initialize the Govee service with API credentials.
@@ -33,8 +34,6 @@ export class GoveeService {
       },
       timeout: 10000
     });
-
-    this.initializePresets();
   }
 
   /**
@@ -111,6 +110,7 @@ export class GoveeService {
         logger.warn('No devices found in Govee API response');
         this.devices = [];
         this.organizeDeviceGroups();
+        this.buildPresets();
         return this.devices;
       }
 
@@ -125,6 +125,7 @@ export class GoveeService {
       }));
 
       this.organizeDeviceGroups();
+      this.buildPresets(); // build presets after devices are loaded
       
       logger.info(`Retrieved ${this.devices.length} Govee devices`);
       return this.devices;
@@ -132,6 +133,7 @@ export class GoveeService {
       logger.error('Failed to fetch Govee devices:', error);
       this.devices = [];
       this.organizeDeviceGroups();
+      this.buildPresets();
       throw error;
     }
   }
@@ -158,7 +160,7 @@ export class GoveeService {
           case 'light-bars':
             return device.model === 'H6047';
           case 'light-strips':
-            return device.model === 'H619B' || 'H612F' || 'H61C2';
+            return device.model === 'H619B' || device.model === 'H612F' || device.model === 'H61C2';
           case 'light-lamps':
             return device.model === 'H8022';
           default:
@@ -166,6 +168,75 @@ export class GoveeService {
         }
       })
     }));
+  }
+
+  /**
+   * Build preset commands based on available devices and their capabilities.
+   * Called after devices are loaded and organized.
+   * 
+   * @private
+   */
+  private buildPresets(): void {
+    this.populatedPresets = LIGHT_PRESETS.map(preset => {
+      const commands: LightPreset['commands'] = [];
+
+      // get target device groups for this preset
+      const targetGroups = this.deviceGroups.filter(group => 
+        preset.groups.includes(group.id)
+      );
+
+      // build commands for each device in target groups
+      targetGroups.forEach(group => {
+        group.devices.forEach(device => {
+          const deviceCommands: Array<{ name: string; value: any }> = [];
+
+          // confirm device is on first
+          if (device.supportCmds.includes('turn')) {
+            deviceCommands.push({
+              name: 'devices.capabilities.on_off',
+              value: 1
+            });
+          }
+
+          // set brightness if supported
+          if (device.supportCmds.includes('brightness')) {
+            deviceCommands.push({
+              name: 'devices.capabilities.range',
+              value: preset.brightness
+            });
+          }
+
+          // set color/colorTemp based on preset config
+          if (preset.color && device.supportCmds.includes('color')) {
+            deviceCommands.push({
+              name: 'devices.capabilities.color_setting',
+              value: preset.color
+            });
+          } else if (preset.colorTemp && device.supportCmds.includes('colorTem')) {
+            deviceCommands.push({
+              name: 'devices.capabilities.color_setting',
+              value: preset.colorTemp
+            });
+          }
+
+          // only add device if it has commands to execute
+          if (deviceCommands.length > 0) {
+            commands.push({
+              deviceId: device.device,
+              model: device.model,
+              commands: deviceCommands
+            });
+          }
+        });
+      });
+
+      return {
+        ...preset,
+        commands
+      };
+    });
+
+    logger.info(`Built ${this.populatedPresets.length} presets with device commands`);
   }
 
   /**
@@ -259,36 +330,34 @@ export class GoveeService {
    * @throws {Error} When preset is not found
    */
   async applyPreset(presetId: string): Promise<void> {
-    const preset = LIGHT_PRESETS.find(p => p.id === presetId);
+    const preset = this.populatedPresets.find(p => p.id === presetId);
     if (!preset) {
       throw new Error(`Preset not found: ${presetId}`);
     }
 
+    if (preset.commands.length === 0) {
+      logger.warn(`Preset ${presetId} has no commands - no compatible devices found`);
+      return;
+    }
+
     const promises = preset.commands.map(async (cmd) => {
       for (const command of cmd.commands) {
-        await this.controlDevice({
-          device: cmd.deviceId,
-          model: cmd.model,
-          cmd: command
-        });
-        // add small delay between commands to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 100));
+        try {
+          await this.controlDevice({
+            device: cmd.deviceId,
+            model: cmd.model,
+            cmd: command
+          });
+          // small delay between commands to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 150));
+        } catch (error) {
+          logger.error(`Failed to apply command to device ${cmd.deviceId}:`, error);
+        }
       }
     });
 
     await Promise.allSettled(promises);
-    logger.info(`Applied preset: ${preset.name}`);
-  }
-
-  /**
-   * Initialize preset configurations.
-   * @TODO Populate preset commands with actual device configurations
-   * 
-   * @private
-   */
-  private initializePresets(): void {
-    // this will be populated once devices are loaded
-    // for now, set up basic presets that can be applied to any device
+    logger.info(`Applied preset: ${preset.name} to ${preset.commands.length} devices`);
   }
 
   /**
@@ -301,12 +370,12 @@ export class GoveeService {
   }
 
   /**
-   * Get available lighting presets.
+   * Get available lighting presets with populated commands.
    * 
    * @returns {LightPreset[]} Array of available presets
    */
   getPresets(): LightPreset[] {
-    return LIGHT_PRESETS;
+    return this.populatedPresets.length > 0 ? this.populatedPresets : LIGHT_PRESETS;
   }
 
   /**
@@ -333,5 +402,16 @@ export class GoveeService {
 
     await Promise.allSettled(promises);
     logger.info(`Applied command to all devices: ${command.name}`);
+  }
+
+  /**
+   * Rebuild presets with current device configuration.
+   * Useful if devices change or new devices are added.
+   * 
+   * @returns {void}
+   */
+  rebuildPresets(): void {
+    this.buildPresets();
+    logger.info('Presets rebuilt with current device configuration');
   }
 }

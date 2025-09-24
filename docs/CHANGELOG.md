@@ -1,3 +1,7 @@
+# NinSys-API v1.2.0
+- Added authentication middleware and routes.
+- Removed API key validator logic (replaced with auth middleware).
+
 # NinSys-API v1.1.5
 - Added support for more Govee devices.
 - Fixed small spelling error for Cogworks Health endpoint.

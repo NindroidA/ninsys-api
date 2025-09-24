@@ -19,6 +19,9 @@ import { createGoveeRoutes } from './routes/govee.js';
 import { generalLimiter } from './middleware/rateLimiter.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { logger } from './utils/logger.js';
+import { authService, AuthService } from './services/authService';
+import { createAuthRoutes } from './routes/auth';
+import { requireAuth } from './middleware/authHandler';
 
 // load env vars from .env file
 dotenv.config();
@@ -33,7 +36,13 @@ const PORT = process.env.PORT || 3001;
  * Validate that all required environment variables are present.
  * Exits the process if any required variables are missing.
  */
-const requiredEnvVars = ['GOVEE_API_KEY', 'COGWORKS_BOT_TOKEN'];
+const requiredEnvVars = [
+  'GOVEE_API_KEY', 
+  'COGWORKS_BOT_TOKEN',
+  'JWT_SECRET',
+  'TOTP_SECRET'
+];
+
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     logger.error(`Missing required environment variable: ${envVar}`);
@@ -76,6 +85,7 @@ app.use(generalLimiter);
 
 /* Mount API route handlers */
 app.use('/health', createHealthRoutes(goveeService, discordService));
+app.use('/api/auth', createAuthRoutes(authService));
 app.use('/api/cogworks', createCogworksRoutes(discordService));
 app.use('/api/govee', createGoveeRoutes(goveeService));
 
@@ -97,6 +107,12 @@ app.get('/', (req, res) => {
         // System endpoints
         'health': '/health',
         'health.cogworks-bot': '/health/cogworks-bot',
+
+        // Auth endpoints
+        'auth.login': 'POST /api/auth/login',
+        'auth.status': 'GET /api/auth/status', 
+        'auth.logout': 'POST /api/auth/logout',
+        'auth.setup': 'GET /api/auth/setup (dev only)',
         
         // Cogworks Bot endpoints
         'cogworks.stats': '/api/cogworks/stats',
@@ -134,7 +150,8 @@ app.use((req, res) => {
     path: req.path,
     method: req.method,
     availableEndpoints: [
-      '/health', '/health/cogworks-bot',
+      '/health', '/health/cogworks-bot', 
+      '/api/auth/login', '/api/auth/status', '/api/auth/logout',
       '/api/cogworks/stats', '/api/cogworks/info', '/api/cogworks/status',
       '/api/cogworks/commands', '/api/cogworks/ping', '/api/cogworks/uptime',
       '/api/govee/devices', '/api/govee/presets', '/api/govee/control',
