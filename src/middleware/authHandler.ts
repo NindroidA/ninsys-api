@@ -4,9 +4,9 @@
  */
 
 import { Response, NextFunction } from "express";
-import { AuthenticatedRequest } from "../types/auth";
-import { authService } from "../services/authService";
-import { logger } from "../utils/logger";
+import { AuthenticatedRequest } from "../types/auth.js";
+import { authService } from "../services/authService.js";
+import { logger } from "../utils/logger.js";
 
 /**
  * Middleware to require TOTP authentication.
