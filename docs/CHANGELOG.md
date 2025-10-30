@@ -1,3 +1,15 @@
+# NinSys-API v1.3.0
+- **Major Cogworks Bot Integration Update**:
+  - Updated bot registration and stats endpoints to match new bot payload structure
+  - Added automatic health monitoring (polls bot health endpoints every 30 seconds)
+  - Implemented bearer token authentication for bot endpoints
+  - Added offline detection (marks bot offline after 10 minutes without updates)
+  - Implemented status caching (30-second TTL for public status endpoint)
+  - Added new public status endpoint with comprehensive health information
+  - Maintained backward compatibility with legacy endpoints
+- Updated TypeScript types for new bot integration
+- Added comprehensive documentation for bot integration in README and ENDPOINTS.md
+
 # NinSys-API v1.2.0
 - Added authentication middleware and routes.
 - Removed API key validator logic (replaced with auth middleware).

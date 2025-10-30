@@ -4,46 +4,128 @@
  */
 
 /**
- * Cogworks Bot status info.
+ * Bot registration payload (sent on startup).
+ * @interface BotRegistrationPayload
+ */
+export interface BotRegistrationPayload {
+  botId: string;
+  username: string;
+  guilds: number;
+  users: number;
+  uptime: number;
+  memoryUsage: number;
+  version: string;
+  environment: 'production' | 'development';
+}
+
+/**
+ * Bot stats update payload (sent every 5 minutes).
+ * @interface BotStatsPayload
+ */
+export interface BotStatsPayload {
+  botId: string;
+  username: string;
+  guilds: number;
+  users: number;
+  uptime: number;
+  memoryUsage: number;
+  version: string;
+  environment: 'production' | 'development';
+}
+
+/**
+ * Bot health check response from localhost:3000/health/ready
+ * @interface BotHealthResponse
+ */
+export interface BotHealthResponse {
+  ready?: boolean;
+  alive?: boolean;
+  uptime: number;
+  timestamp: string;
+}
+
+/**
+ * Public status endpoint response.
+ * @interface CogworksPublicStatus
+ */
+export interface CogworksPublicStatus {
+  online: boolean;
+  ready: boolean;
+  guilds: number;
+  users: number;
+  uptime: number;
+  memoryUsageMB: number;
+  version: string;
+  lastUpdate: string;
+  healthStatus: {
+    ready: boolean;
+    alive: boolean;
+    lastCheck: string;
+  };
+}
+
+/**
+ * Internal bot data store.
+ * @interface CogworksDataStore
+ */
+export interface CogworksDataStore {
+  botId: string | null;
+  username: string | null;
+  guilds: number;
+  users: number;
+  uptime: number;
+  memoryUsage: number;
+  version: string | null;
+  environment: 'production' | 'development' | null;
+  lastUpdate: Date | null;
+  healthStatus: {
+    ready: boolean;
+    alive: boolean;
+    lastCheck: Date | null;
+  };
+}
+
+/**
+ * Cogworks Bot status info (legacy).
  * @interface CogworksStatus
  */
 export interface CogworksStatus {
-  online: boolean;      // whether the bot is online and connected
-  uptime: number;       // bot uptime in seconds
-  ping: number;         // websocket ping latency in milliseconds
-  guilds: number;       // number of discord servers (guilds) the bot is in
-  users: number;        // number of cached discord users
-  lastRestart: string;  // ISO timestamp of last bot restart
-  timestamp: string;    // ISO timestamp of status check
+  online: boolean;
+  uptime: number;
+  ping: number;
+  guilds: number;
+  users: number;
+  lastRestart: string;
+  timestamp: string;
 }
 
 /**
- * Cogworks Bot statistics.
+ * Cogworks Bot statistics (legacy).
  * @interface CogworksStats
  */
 export interface CogworksStats {
-  guilds: number;                  // number of discord servers (guilds)
-  users: number;                   // number of cached discord users
-  channels: number;                // number of cached discord channels
-  uptime: number;                  // bot uptime in seconds
-  memoryUsage: NodeJS.MemoryUsage; // node memory usage stats
-  ping: number;                    // websocket ping latency in milliseconds
-  version: string;                 // bot version string
+  guilds: number;
+  users: number;
+  channels: number;
+  uptime: number;
+  memoryUsage: NodeJS.MemoryUsage;
+  ping: number;
+  version: string;
 }
 
 /**
- * Cogworks Bot profile info.
+ * Cogworks Bot profile info (legacy).
  * @interface CogworksInfo
  */
 export interface CogworksInfo {
-  username: string;      // bot username
-  discriminator: string; // bot discriminator
-  id: string;            // bot discord id
-  avatar: string;        // url to bot avatar image
-  status: string;        // current bot status
-  name?: string;         // optional display name for bot
-  description?: string;  // optional description of bot functionality
-  features?: string[];   // optional array of bot feature descriptionbs
+  username: string;
+  discriminator: string;
+  id: string;
+  avatar: string;
+  status: string;
+  name?: string;
+  description?: string;
+  features?: string[];
 }
 
 /**
@@ -51,9 +133,9 @@ export interface CogworksInfo {
  * @interface CogworksCommandInfo
  */
 export interface CogworksCommandInfo {
-  name: string;        // cmd name
-  description: string; // cmd description
-  options: any[];      // array of cmd options/params
+  name: string;
+  description: string;
+  options: any[];
 }
 
 /**
@@ -61,16 +143,7 @@ export interface CogworksCommandInfo {
  * @interface CogworksUptimeInfo
  */
 export interface CogworksUptimeInfo {
-  uptime: number;    // raw uptime in seconds
-  formatted: string; // formatted uptime string
-  startTime: string; // ISO timestamp of bot start time
-}
-
-export interface CogworksDataStore {
-  stats: CogworksStats | null;
-  info: CogworksInfo | null;
-  status: CogworksStatus | null;
-  commands: CogworksCommandInfo[];
-  lastUpdate: Date | null;
-  isConnected: boolean;
+  uptime: number;
+  formatted: string;
+  startTime: string;
 }

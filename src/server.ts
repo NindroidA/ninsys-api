@@ -14,7 +14,7 @@ const { version, description } = packageJson;
 import { GoveeService } from './services/goveeService.js';
 import { DiscordService } from './services/discordService.js';
 import { createHealthRoutes } from './routes/health.js';
-import { createCogworksRoutes } from './routes/cogworks.js';
+import { createCogworksRoutes, stopHealthCheck } from './routes/cogworks.js';
 import { createGoveeRoutes } from './routes/govee.js';
 import { generalLimiter } from './middleware/rateLimiter.js';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -180,11 +180,13 @@ app.listen(PORT, () => {
  */
 process.on('SIGTERM', () => {
   logger.info('SIGTERM received, shutting down gracefully');
+  stopHealthCheck();
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
   logger.info('SIGINT received, shutting down gracefully');
+  stopHealthCheck();
   process.exit(0);
 });
 
