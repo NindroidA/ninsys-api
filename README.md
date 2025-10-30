@@ -2,14 +2,14 @@
 
 API for Nindroid Systems projects.
 
-## � Features
+## Features
 
 - **Cogworks Bot Integration**: Health monitoring and statistics tracking for the Discord bot
 - **Govee Smart Lights**: Control and automation for smart lighting
 - **Authentication**: JWT + TOTP 2FA for secure access
 - **Health Monitoring**: Automated health checks for connected services
 
-## �🔒 Security Features
+## 🔒 Security Features
 
 - **Rate Limiting**: 100 requests/15min general, 10 requests/min for device control
 - **Helmet Security**: Standard security headers
