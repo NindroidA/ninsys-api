@@ -5,10 +5,10 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { ApiResponse, HealthCheck } from '../types/api.js';
-import { CogworksStatus } from '../types/cogworks.js';
-import { GoveeService } from '../services/goveeService.js';
-import { DiscordService } from '../services/discordService.js';
+import { ApiResponse, HealthCheck } from '../../types/shared/api.js';
+import { CogworksStatus } from '../../types/cogworks/cogworks.js';
+import { GoveeService } from '../../services/shared/goveeService.js';
+import { DiscordService } from '../../services/cogworks/discordService.js';
 
 /**
  * Create health check routes with service dependencies.

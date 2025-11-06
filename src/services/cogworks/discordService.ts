@@ -3,8 +3,8 @@
  * @description Service class for managing Cogworks Bot integration, statistics, and status reporting.
  */
 
-import { CogworksStats, CogworksInfo, CogworksStatus, CogworksCommandInfo, CogworksUptimeInfo } from '../types/cogworks.js';
-import { logger } from '../utils/logger.js';
+import { CogworksStats, CogworksInfo, CogworksStatus, CogworksCommandInfo, CogworksUptimeInfo } from '../../types/cogworks/cogworks.js';
+import { logger } from '../../utils/logger.js';
 
 /**
  * Service class for Cogworks Bot integration and statistics.

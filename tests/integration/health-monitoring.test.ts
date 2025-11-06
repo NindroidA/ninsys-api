@@ -6,8 +6,8 @@
 import request from 'supertest';
 import express from 'express';
 import nock from 'nock';
-import { createCogworksRoutes, stopHealthCheck } from '../../src/routes/cogworks.js';
-import { DiscordService } from '../../src/services/discordService.js';
+import { createCogworksRoutes, stopHealthCheck } from '../../src/routes/cogworks/cogworks.js';
+import { DiscordService } from '../../src/services/cogworks/discordService.js';
 
 describe('Cogworks Health Monitoring - Integration Tests', () => {
   let app: express.Application;

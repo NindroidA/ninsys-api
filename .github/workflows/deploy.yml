@@ -1,40 +1,31 @@
-name: Deploy NinSys API to Homelab.
+name: Deploy NinSys API to Homelab
 
 on:
   push:
     branches: [ main ]
-    # only trigger on push if no tag was created
-  create:
-    # only trigger on tag creation
   workflow_dispatch:
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
-    # deploy on: manual trigger, tag creation, or main branch push (but not both)
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'create' && github.event.ref_type == 'tag' && startsWith(github.event.ref, 'v')) ||
-      (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip ci]'))
     
     steps:
     - name: 🚚 Checkout repository
       uses: actions/checkout@v4
 
-    - name: 📦 Setup Node.js
-      uses: actions/setup-node@v4
+    - name: 📦 Setup Bun
+      uses: oven-sh/setup-bun@v1
       with:
-        node-version: '20'
+        bun-version: latest
 
     - name: 📥 Install dependencies
-      run: npm install
+      run: bun install
 
     - name: 🧪 Run tests (if any)
-      run: npm test || true
+      run: bun test || true
       
     - name: 🔧 Build TypeScript
-      run: npm run build
+      run: bun run build
       env:
         CI: false
 
@@ -48,24 +39,24 @@ jobs:
           ecosystem.config.js
         retention-days: 30
 
-    - name: 🚀 Deploy to Homelab Server
+    - name: 🚀 Deploy to Host Server
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USERNAME }}
         key: ${{ secrets.SERVER_SSH_KEY }}
-        port: 22
+        port: ${{ secrets.SERVER_PORT }}
         script: |
-          echo "🏠 Connected to Homelab Server!"
+          echo "🏠 Connected to Host Server!"
           
           # navigate to deployment directory
-          cd /var/www/ninsys-api || { echo "❌ ninsys-api directory not found!"; exit 1; }
+          cd ~/services/ninsys-api || { echo "❌ ninsys-api directory not found!"; exit 1; }
           
           # backup current deployment
           if [ -d "dist" ]; then
             echo "📦 Backing up current deployment..."
-            sudo rm -rf dist.backup || true
-            sudo mv dist dist.backup || true
+            rm -rf dist.backup || true
+            mv dist dist.backup || true
           fi
           
           # clone/pull latest code
@@ -76,23 +67,22 @@ jobs:
             git clean -fd
           else
             echo "📥 Cloning repository..."
-            sudo rm -rf ./* ./.* 2>/dev/null || true
+            rm -rf ./* ./.* 2>/dev/null || true
             git clone https://github.com/NindroidA/ninsys-api.git .
             git checkout main
           fi
           
-          # setup environment
-          echo "📦 Setting up Node.js environment..."
-          export NVM_DIR="$HOME/.nvm"
-          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+          # setup bun environment
+          echo "📦 Setting up Bun environment..."
+          export BUN_INSTALL="$HOME/.bun"
+          export PATH="$BUN_INSTALL/bin:$PATH"
           
           # install dependencies and build
-          echo "📦 Installing dependencies with npm..."
-          npm install --production
+          echo "📦 Installing dependencies with Bun..."
+          bun install --production
           
-          echo "🔧 Building TypeScript..."
-          npm run build
+          echo "🔧 Building TypeScript with Bun..."
+          bun run build
           
           # ensure environment file exists
           if [ ! -f ".env" ]; then

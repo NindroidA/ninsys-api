@@ -7,9 +7,9 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
-import { ApiResponse } from '../types/api.js';
-import { logger } from '../utils/logger.js';
-import { JWTPayload, AuthenticatedRequest } from '../types/auth.js';
+import { ApiResponse } from '../../types/shared/api.js';
+import { logger } from '../../utils/logger.js';
+import { JWTPayload, AuthenticatedRequest } from '../../types/shared/auth.js';
 import dotenv from 'dotenv';
 
 // load env vars from .env file

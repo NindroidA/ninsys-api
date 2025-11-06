@@ -4,11 +4,11 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { ApiResponse } from '../types/api.js';
-import { GoveeDevice, DeviceGroup, LightPreset } from '../types/govee.js';
-import { GoveeService } from '../services/goveeService.js';
-import { goveeControlLimiter } from '../middleware/rateLimiter.js';
-import { requireAuth } from '../middleware/authHandler.js';
+import { ApiResponse } from '../../types/shared/api.js';
+import { GoveeDevice, DeviceGroup, LightPreset } from '../../types/shared/govee.js';
+import { GoveeService } from '../../services/shared/goveeService.js';
+import { goveeControlLimiter } from '../../middleware/shared/rateLimiter.js';
+import { requireAuth } from '../../middleware/shared/authHandler.js';
 
 /**
  * Create Govee smart light routes with service dependency.

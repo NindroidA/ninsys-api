@@ -16,6 +16,10 @@
     "declarationMap": true,
     "sourceMap": true,
     "isolatedModules": true,
+    
+    // Decorators (for TypeORM)
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
 
     // Bundler mode
     "moduleResolution": "bundler",

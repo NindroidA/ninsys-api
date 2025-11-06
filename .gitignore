@@ -32,6 +32,9 @@ pm2.json
 # vscode
 .vscode
 
+# GitHub Copilot
+.github/copilot-instructions.md
+
 # Finder (MacOS)
 .DS_Store
 

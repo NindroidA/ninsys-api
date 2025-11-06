@@ -31,3 +31,6 @@ export const generalLimiter: import('express').RequestHandler = createRateLimite
 
 /* Strict rate limiter for Govee device control endpoints -- Allows 10 requests per 1 minute to respect Govee API limits */
 export const goveeControlLimiter: import('express').RequestHandler = createRateLimiter(60 * 1000, 10);
+
+/* Auth rate limiter for authentication endpoints -- Allows 5 requests per 15 minutes to prevent brute force attacks */
+export const authLimiter: import('express').RequestHandler = createRateLimiter(15 * 60 * 1000, 5);

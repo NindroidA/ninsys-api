@@ -4,9 +4,9 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { GoveeDevice, GoveeDevicesResponse, GoveeControlRequest, GoveeControlResponse, DeviceGroup, LightPreset } from '../types/govee.js';
-import { GOVEE_BASE_URL, DEVICE_GROUPS, LIGHT_PRESETS } from '../config/govee.js';
-import { logger } from '../utils/logger.js';
+import { GoveeDevice, GoveeDevicesResponse, GoveeControlRequest, GoveeControlResponse, DeviceGroup, LightPreset } from '../../types/shared/govee.js';
+import { GOVEE_BASE_URL, DEVICE_GROUPS, LIGHT_PRESETS } from '../../config/govee.js';
+import { logger } from '../../utils/logger.js';
 
 /**
  * Service class for managing Govee smart lighting devices.

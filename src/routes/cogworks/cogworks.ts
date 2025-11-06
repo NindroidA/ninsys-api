@@ -5,7 +5,7 @@
 
 import { Router, Request, Response } from 'express';
 import axios from 'axios';
-import { ApiResponse } from '../types/api.js';
+import { ApiResponse } from '../../types/shared/api.js';
 import { 
   CogworksStats, 
   CogworksInfo, 
@@ -17,9 +17,9 @@ import {
   BotStatsPayload,
   CogworksPublicStatus,
   BotHealthResponse
-} from '../types/cogworks.js';
-import { DiscordService } from '../services/discordService.js';
-import { logger } from '../utils/logger.js';
+} from '../../types/cogworks/cogworks.js';
+import { DiscordService } from '../../services/cogworks/discordService.js';
+import { logger } from '../../utils/logger.js';
 
 /* Constants */
 const BOT_HEALTH_URL = 'http://localhost:3000';
@@ -51,6 +51,8 @@ let cacheTimestamp: number = 0;
 
 /* Health check interval */
 let healthCheckInterval: NodeJS.Timeout | null = null;
+let consecutiveFailures = 0;
+const MAX_FAILURES_BEFORE_SILENCE = 3; // Only warn for first 3 failures, then go silent
 
 /**
  * Check bot health by calling localhost:3000/health/ready
@@ -71,14 +73,29 @@ async function checkBotHealth(): Promise<void> {
       lastCheck: new Date()
     };
 
+    // Reset failure counter on success
+    if (consecutiveFailures > 0) {
+      logger.info('Bot health check restored');
+      consecutiveFailures = 0;
+    }
+
     logger.debug(`Bot health check: ready=${readyResponse.data.ready}, alive=${liveResponse.data.alive}`);
   } catch (error) {
-    logger.warn('Bot health check failed:', error instanceof Error ? error.message : 'Unknown error');
+    consecutiveFailures++;
+    
     botData.healthStatus = {
       ready: false,
       alive: false,
       lastCheck: new Date()
     };
+
+    // Only log warnings for the first few failures, then go silent
+    if (consecutiveFailures <= MAX_FAILURES_BEFORE_SILENCE) {
+      logger.warn('Bot health check failed:', error instanceof Error ? error.message : 'Unknown error');
+      if (consecutiveFailures === MAX_FAILURES_BEFORE_SILENCE) {
+        logger.info('Bot appears offline - suppressing further health check warnings');
+      }
+    }
   }
 }
 
@@ -128,13 +145,17 @@ function requireBotAuth(req: Request, res: Response, next: Function): void {
 export const createCogworksRoutes = (discordService: DiscordService): Router => {
   const router = Router();
 
-  // Start health check interval
-  if (!healthCheckInterval) {
+  // Start health check interval only if not disabled
+  const healthCheckDisabled = process.env.DISABLE_COGWORKS_HEALTH_CHECK === 'true';
+  
+  if (!healthCheckInterval && !healthCheckDisabled) {
     healthCheckInterval = setInterval(checkBotHealth, HEALTH_CHECK_INTERVAL);
     logger.info('Started bot health check interval (every 30 seconds)');
     
     // Do initial health check
     checkBotHealth();
+  } else if (healthCheckDisabled) {
+    logger.info('Cogworks bot health check is disabled (DISABLE_COGWORKS_HEALTH_CHECK=true)');
   }
 
   /**

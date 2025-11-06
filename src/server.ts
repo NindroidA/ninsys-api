@@ -11,17 +11,23 @@ import dotenv from 'dotenv';
 import packageJson from '../package.json' with { type: 'json' };
 const { version, description } = packageJson;
 
-import { GoveeService } from './services/goveeService.js';
-import { DiscordService } from './services/discordService.js';
-import { createHealthRoutes } from './routes/health.js';
-import { createCogworksRoutes, stopHealthCheck } from './routes/cogworks.js';
-import { createGoveeRoutes } from './routes/govee.js';
-import { generalLimiter } from './middleware/rateLimiter.js';
-import { errorHandler } from './middleware/errorHandler.js';
+import { GoveeService } from './services/shared/goveeService.js';
+import { DiscordService } from './services/cogworks/discordService.js';
+import { createHealthRoutes } from './routes/shared/health.js';
+import { createCogworksRoutes, stopHealthCheck } from './routes/cogworks/cogworks.js';
+import { createGoveeRoutes } from './routes/shared/govee.js';
+import { createRackSmithAuthRoutes } from './routes/racksmith/auth.js';
+import { createRacksRoutes } from './routes/racksmith/racks.js';
+import { createUserPreferencesRoutes } from './routes/racksmith/preferences.js';
+import { createDeviceRoutes } from './routes/racksmith/devices.js';
+import { createConnectionRoutes } from './routes/racksmith/connections.js';
+import { generalLimiter } from './middleware/shared/rateLimiter.js';
+import { errorHandler } from './middleware/shared/errorHandler.js';
 import { logger } from './utils/logger.js';
-import { authService } from './services/authService.js';
-import { createAuthRoutes } from './routes/auth.js';
-import { requireAuth } from './middleware/authHandler.js';
+import { authService } from './services/shared/authService.js';
+import { createAuthRoutes } from './routes/shared/auth.js';
+import { requireAuth } from './middleware/shared/authHandler.js';
+import { initializeDatabase, closeDatabase } from './typeorm/index.js';
 
 // load env vars from .env file
 dotenv.config();
@@ -40,7 +46,12 @@ const requiredEnvVars = [
   'GOVEE_API_KEY', 
   'COGWORKS_BOT_TOKEN',
   'JWT_SECRET',
-  'TOTP_SECRET'
+  'TOTP_SECRET',
+  'MYSQL_DB_HOST',
+  'MYSQL_DB_PORT',
+  'MYSQL_DB_USERNAME',
+  'MYSQL_DB_PASSWORD',
+  'MYSQL_DB_DATABASE'
 ];
 
 for (const envVar of requiredEnvVars) {
@@ -88,6 +99,11 @@ app.use('/health', createHealthRoutes(goveeService, discordService));
 app.use('/api/auth', createAuthRoutes(authService));
 app.use('/api/cogworks', createCogworksRoutes(discordService));
 app.use('/api/govee', createGoveeRoutes(goveeService));
+app.use('/api/racksmith/auth', createRackSmithAuthRoutes());
+app.use('/api/racksmith/racks', createRacksRoutes());
+app.use('/api/racksmith/devices', createDeviceRoutes());
+app.use('/api/racksmith/connections', createConnectionRoutes());
+app.use('/api/users/me/preferences', createUserPreferencesRoutes());
 
 /**
  * Root endpoint -- API info and available endpoints
@@ -162,11 +178,18 @@ app.use((req, res) => {
 });
 
 /* Start HTTP server -- logs startup info and initializes Govee devices */
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   logger.info(`📡 Nindroid Systems API running on port ${PORT}`);
   logger.info(`⚡ Runtime: Node`);
   logger.info(`🔧 Environment: ${process.env.NODE_ENV!}`);
   logger.info(`📝 CORS enabled for: ${allowedOrigins.join(', ')}`);
+  
+  // Initialize database connection
+  try {
+    await initializeDatabase();
+  } catch (error) {
+    logger.error('Failed to initialize database:', error);
+  }
   
   // init Govee devices on startup for faster first requests
   goveeService.getDevices().catch(error => {
@@ -178,15 +201,17 @@ app.listen(PORT, () => {
  * Graceful shutdown handlers
  * Ensure clean server shutdown on process termination signals
  */
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
   stopHealthCheck();
+  await closeDatabase();
   process.exit(0);
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   logger.info('SIGINT received, shutting down gracefully');
   stopHealthCheck();
+  await closeDatabase();
   process.exit(0);
 });
 

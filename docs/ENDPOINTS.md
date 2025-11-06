@@ -98,3 +98,107 @@ The API performs the following health checks:
 - **Health Checks**: Polls `http://localhost:3000/health/ready` and `/health/live` every 30 seconds
 - **Offline Detection**: Marks bot offline if no stats received for 10 minutes
 - **Status Caching**: Caches public status response for 30 seconds
+
+## RackSmith API
+
+### Authentication
+- `POST /api/racksmith/auth/register` - Create new user account
+  ```json
+  {
+    "username": "string (3-20 chars)",
+    "email": "string (valid email)",
+    "password": "string (min 8 chars)",
+    "firstName": "string (optional)",
+    "lastName": "string (optional)"
+  }
+  ```
+
+- `POST /api/racksmith/auth/login` - Login with email or username
+  ```json
+  {
+    "emailOrUsername": "string",
+    "password": "string"
+  }
+  ```
+  Returns: `{ user, token }`
+
+- `GET /api/racksmith/auth/me` - Get current user profile
+  Requires: `Authorization: Bearer <token>` or `X-Dev-Mode: true` (dev only)
+
+### User Preferences
+All endpoints require authentication.
+
+- `GET /api/users/me/preferences` - Get user preferences
+- `PUT /api/users/me/preferences` - Update all preferences (full replace)
+- `PATCH /api/users/me/preferences` - Partial update preferences
+- `POST /api/users/me/preferences/reset` - Reset to default preferences
+
+### Racks
+All endpoints require authentication. Support pagination and search.
+
+- `GET /api/racksmith/racks?page=1&limit=25&search=server` - List racks
+- `GET /api/racksmith/racks/:id` - Get single rack
+- `POST /api/racksmith/racks` - Create rack
+  ```json
+  {
+    "name": "string",
+    "location": "string",
+    "sizeU": number,
+    "description": "string (optional)",
+    "colorTag": "string (hex color, optional)"
+  }
+  ```
+- `PUT /api/racksmith/racks/:id` - Update rack
+- `DELETE /api/racksmith/racks/:id` - Delete rack (soft delete, prevents if has devices)
+
+### Devices
+All endpoints require authentication. Support pagination and filtering.
+
+- `GET /api/racksmith/devices?rackId=uuid&type=server&manufacturer=Dell&search=web&page=1&limit=25` - List devices
+- `GET /api/racksmith/devices/:id` - Get single device
+- `POST /api/racksmith/devices` - Create device
+  ```json
+  {
+    "rackId": "uuid (optional)",
+    "name": "string",
+    "type": "string",
+    "manufacturer": "string (optional)",
+    "model": "string (optional)",
+    "sizeU": number (optional),
+    "positionU": number (optional, 1-42)",
+    "portCount": number,
+    "powerWatts": number (optional)",
+    "notes": "string (optional)"
+  }
+  ```
+- `PUT /api/racksmith/devices/:id` - Update device
+- `DELETE /api/racksmith/devices/:id` - Delete device (soft delete)
+
+### Connections
+All endpoints require authentication. Support filtering by device, cable type, VLAN.
+
+- `GET /api/racksmith/connections?deviceId=uuid&cableType=Cat6&vlan=100&page=1&limit=50` - List connections
+- `GET /api/racksmith/connections/:id` - Get single connection
+- `POST /api/racksmith/connections` - Create connection
+  ```json
+  {
+    "sourceDeviceId": "uuid",
+    "sourcePort": "string",
+    "targetDeviceId": "uuid",
+    "targetPort": "string",
+    "cableType": "string",
+    "cableLengthFt": number (optional),
+    "vlan": "string (optional)",
+    "metadata": {} (optional)
+  }
+  ```
+- `PUT /api/racksmith/connections/:id` - Update connection
+- `DELETE /api/racksmith/connections/:id` - Delete connection
+
+### Coming Soon (Documented, Not Yet Implemented)
+- **Ports**: GET/POST /api/racksmith/devices/:deviceId/ports, PUT/DELETE /api/racksmith/ports/:id
+- **Network Plans**: Full CRUD at /api/racksmith/network-plans
+- **Activity Logs**: GET /api/racksmith/activity-logs with pagination and filtering
+- **Favorites**: Full CRUD at /api/racksmith/favorites with access tracking
+- **Floor Plans**: Full CRUD at /api/racksmith/floor-plans
+- **User Profile**: GET/PUT /api/racksmith/users/:userId, POST /api/racksmith/users/:userId/change-password

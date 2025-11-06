@@ -4,11 +4,11 @@
  */
 
 import { Router, Request, Response } from "express";
-import { AuthService } from "../services/authService.js";
-import { ApiResponse } from "../types/api.js";
-import { logger } from "../utils/logger.js";
-import { AuthenticatedRequest } from "../types/auth.js";
-import { optionalAuth } from "../middleware/authHandler.js";
+import { AuthService } from "../../services/shared/authService.js";
+import { ApiResponse } from "../../types/shared/api.js";
+import { logger } from "../../utils/logger.js";
+import { AuthenticatedRequest } from "../../types/shared/auth.js";
+import { optionalAuth } from "../../middleware/shared/authHandler.js";
 
 /**
  * Create auth routes with service dependency.

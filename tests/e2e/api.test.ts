@@ -14,6 +14,11 @@ process.env.COGWORKS_BOT_TOKEN = 'test-bot-token-12345';
 process.env.JWT_SECRET = 'test-jwt-secret';
 process.env.TOTP_SECRET = 'test-totp-secret';
 process.env.ALLOWED_ORIGINS = 'http://localhost:3000';
+process.env.MYSQL_DB_HOST = 'localhost';
+process.env.MYSQL_DB_PORT = '3306';
+process.env.MYSQL_DB_USERNAME = 'test';
+process.env.MYSQL_DB_PASSWORD = 'test';
+process.env.MYSQL_DB_DATABASE = 'test';
 
 describe('Full API - E2E Tests', () => {
   let app: any;
