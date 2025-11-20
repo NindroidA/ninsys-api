@@ -17,7 +17,7 @@ API for Nindroid Systems projects.
 - **Error Handling**: Sanitized error responses in production
 - **Bot Authentication**: Bearer token authentication for bot endpoints
 
-## 🤖 Cogworks Bot Integration
+## ⚙️ Cogworks Bot Integration
 
 This API integrates with the Cogworks Discord bot for health monitoring and statistics tracking.
 
