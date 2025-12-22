@@ -16,10 +16,11 @@
     "test:unit": "jest --testPathPattern=unit",
     "test:integration": "jest --testPathPattern=integration",
     "test:e2e": "jest --testPathPattern=e2e",
-    "pm2:start": "npm run build && pm2 start ecosystem.config.js",
-    "pm2:stop": "pm2 stop ninsys-api",
-    "pm2:restart": "pm2 restart ninsys-api",
-    "pm2:logs": "pm2 logs ninsys-api"
+    "docker:build": "docker build -t ninsys-api .",
+    "docker:run": "docker run -p 3001:3001 --env-file .env ninsys-api",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f ninsys-api"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",

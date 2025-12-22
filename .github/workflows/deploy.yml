@@ -5,41 +5,49 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  IMAGE_NAME: ninsys-api
+  IMAGE_TAG: ${{ github.sha }}
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: 🚚 Checkout repository
+    - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: 📦 Setup Bun
-      uses: oven-sh/setup-bun@v1
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        bun-version: latest
+        node-version: '20'
 
-    - name: 📥 Install dependencies
-      run: bun install
+    - name: Install dependencies
+      run: npm ci
 
-    - name: 🧪 Run tests (if any)
-      run: bun test || true
-      
-    - name: 🔧 Build TypeScript
-      run: bun run build
-      env:
-        CI: false
+    - name: Run tests
+      run: npm test
 
-    - name: 📊 Upload build artifacts
-      uses: actions/upload-artifact@v4
+    - name: Build Docker image
+      run: |
+        docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest .
+
+    - name: Save Docker image
+      run: |
+        docker save $IMAGE_NAME:latest | gzip > ninsys-api-image.tar.gz
+        ls -lh ninsys-api-image.tar.gz
+
+    - name: Copy image to server
+      uses: appleboy/scp-action@v0.1.7
       with:
-        name: ninsys-api-build
-        path: |
-          dist/
-          package*.json
-          ecosystem.config.js
-        retention-days: 30
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: ${{ secrets.SERVER_PORT }}
+        source: "ninsys-api-image.tar.gz"
+        target: "/tmp/"
 
-    - name: 🚀 Deploy to Host Server
+    - name: Deploy on server
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SERVER_HOST }}
@@ -47,93 +55,49 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: ${{ secrets.SERVER_PORT }}
         script: |
-          echo "🏠 Connected to Host Server!"
-          
-          # navigate to deployment directory
-          cd ~/services/ninsys-api || { echo "❌ ninsys-api directory not found!"; exit 1; }
-          
-          # backup current deployment
-          if [ -d "dist" ]; then
-            echo "📦 Backing up current deployment..."
-            rm -rf dist.backup || true
-            mv dist dist.backup || true
-          fi
-          
-          # clone/pull latest code
-          if [ -d ".git" ]; then
-            echo "🔄 Pulling latest changes..."
-            git fetch origin
-            git reset --hard origin/main
-            git clean -fd
-          else
-            echo "📥 Cloning repository..."
-            rm -rf ./* ./.* 2>/dev/null || true
-            git clone https://github.com/NindroidA/ninsys-api.git .
-            git checkout main
-          fi
-          
-          # setup bun environment
-          echo "📦 Setting up Bun environment..."
-          export BUN_INSTALL="$HOME/.bun"
-          export PATH="$BUN_INSTALL/bin:$PATH"
-          
-          # install dependencies and build
-          echo "📦 Installing dependencies with Bun..."
-          bun install --production
-          
-          echo "🔧 Building TypeScript with Bun..."
-          bun run build
-          
-          # ensure environment file exists
-          if [ ! -f ".env" ]; then
-            echo "⚠️  .env file not found, copying from .env.example"
-            cp .env.example .env
-            echo "🔧 Please update .env with actual API keys"
-          fi
-          
-          # create logs directory
-          mkdir -p logs
-          
-          # stop existing API if running
-          echo "🛑 Stopping existing API..."
-          pm2 stop ninsys-api || echo "API was not running"
-          
-          # start/restart API with PM2
-          echo "🚀 Starting API with PM2..."
-          pm2 start ecosystem.config.js || pm2 restart ninsys-api
-          
-          # save PM2 configuration
-          pm2 save
-          
-          # wait a moment for startup
-          sleep 3
-          
-          # test the API deployment
-          echo "🧪 Testing API deployment..."
+          echo "Loading Docker image..."
+          docker load < /tmp/ninsys-api-image.tar.gz
+
+          echo "Stopping existing container..."
+          cd /opt/docker
+          docker-compose stop ninsys-api || echo "Container was not running"
+
+          echo "Starting container with docker-compose..."
+          docker-compose up -d ninsys-api
+
+          echo "Cleaning up..."
+          rm -f /tmp/ninsys-api-image.tar.gz
+          docker image prune -f
+
+          echo "Waiting for container to start..."
+          sleep 5
+
+          echo "Verifying deployment..."
           if curl -f -s http://localhost:3001/health > /dev/null; then
-            echo "✅ API deployment successful! API is running"
-            pm2 status
+            echo "API health check passed!"
+            docker-compose ps ninsys-api
           else
-            echo "❌ API health check failed"
-            pm2 logs ninsys-api --lines 10
+            echo "API health check failed!"
+            docker-compose logs ninsys-api --tail 20
             exit 1
           fi
-          
-          # test external access if nginx proxy is configured
-          if curl -f -s https://nindroidsystems.com/api/health > /dev/null; then
-            echo "✅ External API access working!"
-          else
-            echo "⚠️  External API access not working (nginx proxy may need configuration)"
-          fi
-          
-          echo "🎉 Deployment completed!"
 
-    - name: 🔔 Notify on success
+          # Test external access if nginx proxy is configured
+          if curl -f -s https://nindroidsystems.com/api/health > /dev/null; then
+            echo "External API access working!"
+          else
+            echo "External API access not working (nginx proxy may need configuration)"
+          fi
+
+          echo "Deployment completed!"
+
+    - name: Notify on success
       if: success()
       run: |
-        echo "✅ Nindroid Systems API deployed successfully!"
+        echo "NinSys API deployed successfully!"
+        echo "Image: $IMAGE_NAME:$IMAGE_TAG"
 
-    - name: 🔔 Notify on failure  
+    - name: Notify on failure
       if: failure()
       run: |
-        echo "❌ API deployment failed! Check the logs above."
+        echo "Deployment failed! Check the logs above."

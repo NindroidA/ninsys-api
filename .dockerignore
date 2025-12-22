@@ -1,0 +1,56 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Build artifacts
+dist
+coverage
+
+# Git
+.git
+.gitignore
+
+# Environment files (mounted or passed as env vars in production)
+.env
+.env.*
+!.env.example
+
+# Private/sensitive documentation
+private/
+
+# Development files
+.vscode
+.idea
+*.code-workspace
+
+# Tests (not needed in production image)
+tests/
+jest.config.js
+*.test.ts
+*.spec.ts
+
+# Documentation (not needed in production image)
+docs/
+*.md
+!README.md
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Bun lock file (using npm in Docker)
+bun.lock
+
+# GitHub
+.github/
+
+# Claude
+.claude/
+
+# Misc
+*.tgz
+*.tar.gz

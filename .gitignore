@@ -34,6 +34,7 @@ pm2.json
 
 # GitHub Copilot
 .github/copilot-instructions.md
+.claude/
 
 # Finder (MacOS)
 .DS_Store

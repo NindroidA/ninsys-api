@@ -1,3 +1,35 @@
+# NinSys-API v1.6.0
+- **Docker Migration**:
+  - Added multi-stage Dockerfile (Node 20 Alpine, ~180MB production image)
+  - Created `.dockerignore` for optimized builds
+  - Created `docker-compose.yml` for local development and server reference
+  - Removed PM2 dependency (`ecosystem.config.js` deleted)
+  - Added Docker-related npm scripts (docker:build, docker:up, docker:down, docker:logs)
+
+- **CI/CD Improvements**:
+  - Updated GitHub Actions `deploy.yml` for Docker-based deployment
+  - Workflow now builds image, transfers via SCP, and restarts container via docker compose
+  - Created `dev.yml` workflow for dev branch CI (tests + build, no deployment)
+  - Added coverage reporting with Codecov integration
+
+- **Test Coverage Expansion**:
+  - Added comprehensive RackSmith service tests (auth, devices, connections, preferences)
+  - Added middleware tests (authHandler, errorHandler, rateLimiter)
+  - Added RackSmith integration tests (auth routes, device routes, connection routes)
+  - Updated test setup with TypeORM DataSource mocking
+  - Improved test isolation and database mocking
+
+- **Documentation**:
+  - Created `.claude/CLAUDE.md` for AI agent quick reference
+  - Created `TODO.md` for project tracking
+  - Updated `.github/copilot-instructions.md` with Docker deployment info
+  - Added server Docker Compose configuration documentation
+
+- **Branch Workflow**:
+  - Established `dev` branch for development/staging
+  - Dev branch runs CI (tests, typecheck, Docker build) without deployment
+  - Main branch triggers full deployment pipeline
+
 # NinSys-API v1.5.0
 - **RackSmith API Expansion**:
   - **New Entities**:
