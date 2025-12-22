@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package*.json bun.lock* ./
 
 # Install all dependencies (including devDependencies for build)
-RUN npm ci
+RUN npm install
 
 # Copy TypeScript config and source code
 COPY tsconfig.json ./
@@ -32,7 +32,7 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --omit=dev && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
