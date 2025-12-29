@@ -72,7 +72,7 @@ jobs:
           fi
 
           # Test external access if nginx proxy is configured
-          if curl -f -s https://nindroidsystems.com/api/health > /dev/null; then
+          if curl -f -s https://nindroidsystems.com/health > /dev/null; then
             echo "External API access working!"
           else
             echo "External API access not working (nginx proxy may need configuration)"

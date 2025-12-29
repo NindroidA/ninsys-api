@@ -202,3 +202,117 @@ All endpoints require authentication. Support filtering by device, cable type, V
 - **Favorites**: Full CRUD at /api/racksmith/favorites with access tracking
 - **Floor Plans**: Full CRUD at /api/racksmith/floor-plans
 - **User Profile**: GET/PUT /api/racksmith/users/:userId, POST /api/racksmith/users/:userId/change-password
+
+## Homepage API
+
+API endpoints for the ninsys-homepage portfolio site. Uses TOTP authentication for admin operations.
+
+### Projects
+Portfolio project management.
+
+- `GET /api/projects` - List all projects (public)
+  - Query params: `?category=current|completed&featured=true`
+  - Returns projects sorted by display order
+
+- `GET /api/projects/:id` - Get single project (public)
+
+- `POST /api/projects` - Create project (requires auth)
+  ```json
+  {
+    "title": "string",
+    "description": "string",
+    "technologies": ["string"],
+    "category": "current | completed",
+    "image": "string (optional)",
+    "githubUrl": "string (optional)",
+    "liveUrl": "string (optional)",
+    "date": "YYYY-MM",
+    "featured": boolean (optional),
+    "order": number (optional)
+  }
+  ```
+
+- `PUT /api/projects/:id` - Update project (requires auth)
+
+- `DELETE /api/projects/:id` - Delete project (requires auth)
+
+- `PUT /api/projects/reorder` - Reorder projects (requires auth)
+  ```json
+  {
+    "projectIds": ["uuid", "uuid", "uuid"]
+  }
+  ```
+
+### About Page
+About page content management.
+
+- `GET /api/about` - Get about page data (public)
+  ```json
+  {
+    "success": true,
+    "data": {
+      "profile": {
+        "name": "string",
+        "tagline": "string",
+        "location": "string",
+        "bio": ["string"],
+        "avatarUrl": "string (optional)",
+        "social": {
+          "github": "string (optional)",
+          "linkedin": "string (optional)",
+          "email": "string (optional)"
+        }
+      },
+      "sections": [
+        {
+          "id": "uuid",
+          "type": "skills | interests | experience | education | custom",
+          "title": "string",
+          "icon": "string (Lucide icon name, optional)",
+          "order": number,
+          "size": "small | medium | large",
+          "content": { ... }
+        }
+      ]
+    }
+  }
+  ```
+
+- `PUT /api/about` - Update about page data (requires auth)
+  ```json
+  {
+    "profile": { ... },
+    "sections": [ ... ]
+  }
+  ```
+
+- `PUT /api/about/sections` - Reorder sections (requires auth)
+  ```json
+  {
+    "sections": [
+      { "id": "uuid", "order": 0 },
+      { "id": "uuid", "order": 1 }
+    ]
+  }
+  ```
+
+- `POST /api/about/sections` - Add new section (requires auth)
+
+- `PUT /api/about/sections/:sectionId` - Update section (requires auth)
+
+- `DELETE /api/about/sections/:sectionId` - Delete section (requires auth)
+
+### GitHub Integration
+Fetch repos and import as projects. Requires `GITHUB_PAT` environment variable.
+
+- `GET /api/github/repos` - Fetch repos from GitHub (public, uses server PAT)
+  - Query params: `?per_page=30&sort=updated|pushed|full_name&direction=asc|desc`
+  - Returns: repos with caching info
+
+- `GET /api/github/repos/:owner/:repo` - Get specific repo (public)
+
+- `POST /api/github/import/:repoName` - Import repo as project (requires auth)
+  - Creates new project from GitHub repo data
+  - Returns: created project
+
+- `POST /api/github/cache/clear` - Clear GitHub cache (requires auth)

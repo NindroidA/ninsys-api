@@ -6,7 +6,7 @@
 import request from 'supertest';
 import express from 'express';
 import nock from 'nock';
-import { createCogworksRoutes, stopHealthCheck } from '../../src/routes/cogworks/cogworks.js';
+import { createCogworksRoutes, stopHealthCheck, resetBotState } from '../../src/routes/cogworks/cogworks.js';
 import { DiscordService } from '../../src/services/cogworks/discordService.js';
 
 describe('Cogworks Routes - Unit Tests', () => {
@@ -19,13 +19,16 @@ describe('Cogworks Routes - Unit Tests', () => {
   });
 
   beforeEach(() => {
+    // Reset bot state to ensure clean slate
+    resetBotState();
+
     // Create fresh Express app for each test
     app = express();
     app.use(express.json());
-    
+
     // Create Discord service
     discordService = new DiscordService(BOT_TOKEN);
-    
+
     // Mount routes
     app.use('/api/cogworks', createCogworksRoutes(discordService));
 

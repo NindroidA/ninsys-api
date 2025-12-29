@@ -15,6 +15,8 @@ import { Port } from './entities/Port.js';
 import { ActivityLog } from './entities/ActivityLog.js';
 import { Favorite } from './entities/Favorite.js';
 import { FloorPlan } from './entities/FloorPlan.js';
+import { Project } from './entities/Project.js';
+import { AboutContent } from './entities/AboutContent.js';
 
 export const AppDataSource = new DataSource({
   type: 'mysql',
@@ -23,9 +25,9 @@ export const AppDataSource = new DataSource({
   username: process.env.MYSQL_DB_USERNAME,
   password: process.env.MYSQL_DB_PASSWORD,
   database: process.env.MYSQL_DB_DATABASE,
-  synchronize: false, // Don't auto-create schema in production
+  synchronize: true,
   logging: process.env.NODE_ENV === 'dev',
-  entities: [User, Rack, Device, Connection, NetworkPlan, UserPreferences, Port, ActivityLog, Favorite, FloorPlan],
+  entities: [User, Rack, Device, Connection, NetworkPlan, UserPreferences, Port, ActivityLog, Favorite, FloorPlan, Project, AboutContent],
   migrations: ['src/typeorm/migrations/**/*.ts'],
   subscribers: [],
 });

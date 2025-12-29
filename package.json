@@ -1,6 +1,6 @@
 {
   "name": "ninsys-api",
-  "version": "1.5.0",
+  "version": "1.7.0",
   "description": "API for Nindroid Systems projects",
   "main": "dist/server.js",
   "type": "module",

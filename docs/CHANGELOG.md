@@ -1,3 +1,34 @@
+# NinSys-API v1.7.0
+- **Homepage API - Portfolio Management**:
+  - New Projects CRUD API (`/api/projects`):
+    - List all projects with category/featured filtering
+    - Create, update, delete projects with TOTP authentication
+    - Bulk reorder projects for custom display order
+    - Fields: title, description, technologies, category, image, URLs, date, featured
+  - New About Page API (`/api/about`):
+    - Store profile info (name, tagline, bio, social links)
+    - Flexible sections system (skills, interests, experience, education, custom)
+    - Section reordering and CRUD operations
+    - Auto-creates default content on first access
+  - New GitHub Integration (`/api/github`):
+    - Fetch repos from GitHub using server-stored PAT
+    - 5-minute caching to avoid rate limits
+    - Import repos as projects with one click
+    - Optional `GITHUB_PAT` env var (warns if missing, doesn't crash)
+
+- **New Database Entities**:
+  - `Project` entity with JSON technologies column
+  - `AboutContent` entity with JSON profile and sections
+  - Both registered in TypeORM DataSource
+
+- **Authentication**:
+  - Uses existing TOTP auth system (`requireAuth` middleware)
+  - Public read access for projects and about data
+  - Protected write operations (create, update, delete)
+
+- **Documentation**:
+  - Updated ENDPOINTS.md with full Homepage API documentation
+
 # NinSys-API v1.6.0
 - **Docker Migration**:
   - Added multi-stage Dockerfile (Node 20 Alpine, ~180MB production image)

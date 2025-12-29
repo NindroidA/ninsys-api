@@ -21,6 +21,9 @@ import { createRacksRoutes } from './routes/racksmith/racks.js';
 import { createUserPreferencesRoutes } from './routes/racksmith/preferences.js';
 import { createDeviceRoutes } from './routes/racksmith/devices.js';
 import { createConnectionRoutes } from './routes/racksmith/connections.js';
+import { createProjectsRoutes } from './routes/homepage/projects.js';
+import { createAboutRoutes } from './routes/homepage/about.js';
+import { createGitHubRoutes } from './routes/homepage/github.js';
 import { generalLimiter } from './middleware/shared/rateLimiter.js';
 import { errorHandler } from './middleware/shared/errorHandler.js';
 import { logger } from './utils/logger.js';
@@ -59,6 +62,11 @@ for (const envVar of requiredEnvVars) {
     logger.error(`Missing required environment variable: ${envVar}`);
     process.exit(1);
   }
+}
+
+// Warn about optional environment variables
+if (!process.env.GITHUB_PAT) {
+  logger.warn('⚠️  GITHUB_PAT not configured - GitHub integration features will be disabled');
 }
 
 /* Initialize service instances with environment config. */
@@ -105,6 +113,11 @@ app.use('/api/racksmith/devices', createDeviceRoutes());
 app.use('/api/racksmith/connections', createConnectionRoutes());
 app.use('/api/users/me/preferences', createUserPreferencesRoutes());
 
+/* Homepage API routes */
+app.use('/api/projects', createProjectsRoutes());
+app.use('/api/about', createAboutRoutes());
+app.use('/api/github', createGitHubRoutes());
+
 /**
  * Root endpoint -- API info and available endpoints
  * 
@@ -144,7 +157,20 @@ app.get('/', (req, res) => {
         'govee.control': '/api/govee/control',
         'govee.controlGroup': '/api/govee/control/group',
         'govee.controlAll': '/api/govee/control/all',
-        'govee.preset': '/api/govee/preset/:presetId'
+        'govee.preset': '/api/govee/preset/:presetId',
+
+        // Homepage API endpoints
+        'projects.list': 'GET /api/projects',
+        'projects.get': 'GET /api/projects/:id',
+        'projects.create': 'POST /api/projects',
+        'projects.update': 'PUT /api/projects/:id',
+        'projects.delete': 'DELETE /api/projects/:id',
+        'projects.reorder': 'PUT /api/projects/reorder',
+        'about.get': 'GET /api/about',
+        'about.update': 'PUT /api/about',
+        'about.sections': 'PUT /api/about/sections',
+        'github.repos': 'GET /api/github/repos',
+        'github.import': 'POST /api/github/import/:repoName'
       }
     },
     timestamp: new Date().toISOString()
@@ -166,12 +192,13 @@ app.use((req, res) => {
     path: req.path,
     method: req.method,
     availableEndpoints: [
-      '/health', '/health/cogworks-bot', 
+      '/health', '/health/cogworks-bot',
       '/api/auth/login', '/api/auth/status', '/api/auth/logout',
       '/api/cogworks/stats', '/api/cogworks/info', '/api/cogworks/status',
       '/api/cogworks/commands', '/api/cogworks/ping', '/api/cogworks/uptime',
       '/api/govee/devices', '/api/govee/presets', '/api/govee/control',
-      '/api/govee/control/group', '/api/govee/control/all', '/api/govee/preset/:id'
+      '/api/govee/control/group', '/api/govee/control/all', '/api/govee/preset/:id',
+      '/api/projects', '/api/about', '/api/github/repos'
     ],
     timestamp: new Date().toISOString()
   });

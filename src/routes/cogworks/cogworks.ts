@@ -440,3 +440,28 @@ export function stopHealthCheck(): void {
     logger.info('Stopped bot health check interval');
   }
 }
+
+/**
+ * Reset bot data state (for testing purposes)
+ */
+export function resetBotState(): void {
+  botData = {
+    botId: null,
+    username: null,
+    guilds: 0,
+    users: 0,
+    uptime: 0,
+    memoryUsage: 0,
+    version: null,
+    environment: null,
+    lastUpdate: null,
+    healthStatus: {
+      ready: false,
+      alive: false,
+      lastCheck: null,
+    },
+  };
+  cachedStatus = null;
+  cacheTimestamp = 0;
+  consecutiveFailures = 0;
+}
