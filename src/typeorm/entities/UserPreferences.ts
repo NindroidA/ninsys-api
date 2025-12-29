@@ -53,54 +53,25 @@ export class UserPreferences {
 
   @Column({
     type: 'json',
-    default: {
-      mode: 'dark',
-      primaryColor: '#3b82f6',
-      accentColor: '#8b5cf6',
-      fontSize: 'medium',
-      density: 'comfortable'
-    }
+    default: () => "'{\"mode\":\"dark\",\"primaryColor\":\"#3b82f6\",\"accentColor\":\"#8b5cf6\",\"fontSize\":\"medium\",\"density\":\"comfortable\"}'"
   })
   theme!: ThemePreferences;
 
   @Column({
     type: 'json',
-    default: {
-      rackSize_u: 42,
-      rackColorTag: 'blue',
-      deviceManufacturer: 'cisco',
-      cableType: 'cat6',
-      autoSave: true,
-      autoSaveInterval: 5,
-      confirmDelete: true,
-      showWelcomeScreen: true
-    }
+    default: () => "'{\"rackSize_u\":42,\"rackColorTag\":\"blue\",\"deviceManufacturer\":\"cisco\",\"cableType\":\"cat6\",\"autoSave\":true,\"autoSaveInterval\":5,\"confirmDelete\":true,\"showWelcomeScreen\":true}'"
   })
   defaults!: DefaultPreferences;
 
   @Column({
     type: 'json',
-    default: {
-      sidebarCollapsed: false,
-      showRackLabels: true,
-      showUNumbers: true,
-      showPowerUsage: true,
-      gridView: true,
-      itemsPerPage: 20,
-      defaultSortBy: 'name',
-      defaultSortOrder: 'asc'
-    }
+    default: () => "'{\"sidebarCollapsed\":false,\"showRackLabels\":true,\"showUNumbers\":true,\"showPowerUsage\":true,\"gridView\":true,\"itemsPerPage\":20,\"defaultSortBy\":\"name\",\"defaultSortOrder\":\"asc\"}'"
   })
   view!: ViewPreferences;
 
   @Column({
     type: 'json',
-    default: {
-      enabled: true,
-      showToasts: true,
-      playSound: false,
-      position: 'top-right'
-    }
+    default: () => "'{\"enabled\":true,\"showToasts\":true,\"playSound\":false,\"position\":\"top-right\"}'"
   })
   notifications!: NotificationPreferences;
 
