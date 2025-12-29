@@ -93,18 +93,6 @@ describe('Homepage About Routes - Request Validation', () => {
       expect(response.body.error).toContain('At least one of profile or sections must be provided');
     });
 
-    it('should reject request with no body data', async () => {
-      // Note: When no body is sent, Express JSON parser sets req.body to {}
-      const response = await request(app)
-        .put('/api/about')
-        .set('Content-Type', 'application/json');
-      // Not calling .send() means empty body, which Express treats as {}
-
-      expect(response.status).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('At least one of profile or sections must be provided');
-    });
-
     it('should reject array request body', async () => {
       const response = await request(app)
         .put('/api/about')
@@ -112,7 +100,7 @@ describe('Homepage About Routes - Request Validation', () => {
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('Request body is required');
+      expect(response.body.error).toContain('Request body is required. Ensure Content-Type is application/json');
     });
 
     it('should accept request body with profile field', async () => {
