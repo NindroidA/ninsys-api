@@ -51,7 +51,7 @@ jobs:
           COMMIT_COUNT=$(git rev-list --count origin/main..HEAD 2>/dev/null || echo "0")
 
           # Get recent commits for body (max 15)
-          RECENT_COMMITS=$(git log origin/main..HEAD --oneline --no-merges 2>/dev/null | head -15 || echo "Initial commits")
+          RECENT_COMMITS=$(git log origin/main..HEAD --oneline --no-merges 2>/dev/null | head -15 || echo "")
 
           # Create draft PR (mark as "Ready for review" to trigger Copilot)
           gh pr create \
