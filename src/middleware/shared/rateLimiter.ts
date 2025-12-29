@@ -6,7 +6,7 @@
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction } from 'express';
 
-const isDev = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === 'dev';
 
 /**
  * No-op middleware that skips rate limiting (used in dev mode)
