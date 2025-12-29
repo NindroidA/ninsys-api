@@ -44,3 +44,7 @@ Bot endpoints require `Authorization: Bearer <COGWORKS_BOT_TOKEN>` header:
 ## 📝 Documentation
 
 See [ENDPOINTS.md](./docs/ENDPOINTS.md) for complete API documentation.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.

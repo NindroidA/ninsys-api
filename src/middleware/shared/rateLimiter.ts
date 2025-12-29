@@ -4,15 +4,28 @@
  */
 
 import rateLimit from 'express-rate-limit';
+import { Request, Response, NextFunction } from 'express';
+
+const isDev = process.env.NODE_ENV === 'dev' || process.env.NODE_ENV === 'development';
+
+/**
+ * No-op middleware that skips rate limiting (used in dev mode)
+ */
+const skipLimiter = (_req: Request, _res: Response, next: NextFunction) => next();
 
 /**
  * Create a rate limiter with custom configuration.
- * 
+ * In dev mode, returns a no-op middleware that skips rate limiting.
+ *
  * @param {number} windowMs Time window in milliseconds
  * @param {number} max Maximum number of requests per window
  * @returns {import('express').RequestHandler} Express middleware function
  */
 export const createRateLimiter = (windowMs: number, max: number): import('express').RequestHandler => {
+  if (isDev) {
+    return skipLimiter;
+  }
+
   return rateLimit({
     windowMs,
     max,
