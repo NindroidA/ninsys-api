@@ -1,0 +1,85 @@
+name: Auto Create Draft PR
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  create-draft-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Need full history for commit comparison
+
+      - name: Check for existing PR
+        id: check-pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Check if an open PR already exists for dev → main
+          PR_COUNT=$(gh pr list --head dev --base main --state open --json number --jq 'length')
+          echo "pr_count=$PR_COUNT" >> $GITHUB_OUTPUT
+
+          if [ "$PR_COUNT" -gt 0 ]; then
+            echo "✅ PR already exists, will be updated with new commits"
+            PR_NUMBER=$(gh pr list --head dev --base main --state open --json number --jq '.[0].number')
+            echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          else
+            echo "📝 No open PR found, will create new draft PR"
+          fi
+
+      - name: Create Draft PR
+        if: steps.check-pr.outputs.pr_count == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get the latest commit message and clean it up for PR title
+          RAW_COMMIT=$(git log -1 --pretty=%s)
+          # Strip conventional commit prefix (feat:, fix:, ci:, etc.) and capitalize (portable: uses awk, not GNU sed extensions)
+          COMMIT_MSG=$(echo "$RAW_COMMIT" | sed 's/^[a-z]*: //' | awk '{printf toupper(substr($0,1,1)) substr($0,2) "\n"}')
+
+          # Get version from package.json
+          VERSION=$(jq -r '.version' package.json)
+
+          # Get commit count
+          COMMIT_COUNT=$(git rev-list --count origin/main..HEAD 2>/dev/null || echo "0")
+
+          # Get recent commits for body (max 15)
+          RECENT_COMMITS=$(git log origin/main..HEAD --oneline --no-merges 2>/dev/null | head -15 || echo "")
+
+          # Create draft PR (mark as "Ready for review" to trigger Copilot)
+          gh pr create \
+            --draft \
+            --base main \
+            --head dev \
+            --title "v$VERSION: $COMMIT_MSG" \
+            --body "## Summary
+
+          Auto-generated draft PR for changes on \`dev\` branch.
+
+          ### Commits ($COMMIT_COUNT total)
+
+          \`\`\`
+          $RECENT_COMMITS
+          \`\`\`
+
+          ---
+
+          *This PR was automatically created by GitHub Actions.*
+          *Mark as \"Ready for review\" to trigger Copilot review.*"
+
+          echo "✅ Draft PR created successfully"
+
+      - name: Output result
+        run: |
+          if [ "${{ steps.check-pr.outputs.pr_count }}" -gt 0 ]; then
+            echo "::notice::PR #${{ steps.check-pr.outputs.pr_number }} already exists and will be updated with new commits"
+          else
+            echo "::notice::New draft PR created for dev → main"
+          fi

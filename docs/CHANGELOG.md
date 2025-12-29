@@ -1,3 +1,14 @@
+# Patch v1.7.3
+- **Workflow**: Added `auto-pr.yml` - auto-creates draft PRs on dev branch push
+  - PR title format: `v{VERSION}: {Clean Commit Message}`
+  - Mark as "Ready for review" to trigger Copilot review
+- **License**: Added MIT License
+- **Docs**: Copilot instructions tracked in version control
+  - Updated to v1.7.3 with Homepage API, workflows, and recent fixes
+  - Added GitHub Workflows section with Copilot auto-review setup guide
+- **Dev Experience**: Rate limiting now disabled in dev mode (`NODE_ENV=dev`)
+- **Fix**: Added request body validation to `PUT /api/about` with clearer error message
+
 # Hotfix v1.7.1
 - **Fix**: Removed JSON column defaults from UserPreferences entity
   - MySQL < 8.0.13 doesn't support default values on JSON/BLOB/TEXT columns
