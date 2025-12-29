@@ -41,8 +41,8 @@ jobs:
         run: |
           # Get the latest commit message and clean it up for PR title
           RAW_COMMIT=$(git log -1 --pretty=%s)
-          # Strip conventional commit prefix (feat:, fix:, ci:, etc.) and capitalize
-          COMMIT_MSG=$(echo "$RAW_COMMIT" | sed 's/^[a-z]*: //' | sed 's/^./\U&/')
+          # Strip conventional commit prefix (feat:, fix:, ci:, etc.) and capitalize (portable: uses awk, not GNU sed extensions)
+          COMMIT_MSG=$(echo "$RAW_COMMIT" | sed 's/^[a-z]*: //' | awk '{printf toupper(substr($0,1,1)) substr($0,2) "\n"}')
 
           # Get version from package.json
           VERSION=$(jq -r '.version' package.json)
