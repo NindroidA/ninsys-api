@@ -6,8 +6,6 @@
 - **Docs**: Copilot instructions tracked in version control
   - Updated to v1.7.3 with Homepage API, workflows, and recent fixes
   - Added GitHub Workflows section with Copilot auto-review setup guide
-
-# Patch v1.7.2
 - **Dev Experience**: Rate limiting now disabled in dev mode (`NODE_ENV=dev`)
 - **Fix**: Added request body validation to `PUT /api/about` with clearer error message
 
