@@ -40,7 +40,8 @@ export const createAboutRoutes = (): Router => {
    */
   router.put('/', requireAuth as any, async (req: Request, res: Response): Promise<void> => {
     try {
-      if (!req.body || typeof req.body !== 'object') {
+      // Validate request body is a plain object (not null, array, or other types)
+      if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
         res.status(400).json({
           success: false,
           error: 'Request body is required. Ensure Content-Type is application/json',
@@ -51,6 +52,7 @@ export const createAboutRoutes = (): Router => {
 
       const { profile, sections } = req.body;
 
+      // Ensure at least one expected field is provided (prevents empty objects)
       if (!profile && !sections) {
         res.status(400).json({
           success: false,
