@@ -1,3 +1,9 @@
+# Hotfix v1.7.1
+- **Fix**: Removed JSON column defaults from UserPreferences entity
+  - MySQL < 8.0.13 doesn't support default values on JSON/BLOB/TEXT columns
+  - Defaults are now handled exclusively in the service layer (already were)
+  - Exported default constants from entity file for consistency
+
 # NinSys-API v1.7.0
 - **Homepage API - Portfolio Management**:
   - New Projects CRUD API (`/api/projects`):

@@ -43,6 +43,56 @@ export interface NotificationPreferences {
   position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 }
 
+/**
+ * Default values for theme preferences
+ * Used in service layer since MySQL < 8.0.13 doesn't support JSON defaults
+ */
+export const DEFAULT_THEME: ThemePreferences = {
+  mode: 'dark',
+  primaryColor: '#3b82f6',
+  accentColor: '#8b5cf6',
+  fontSize: 'medium',
+  density: 'comfortable'
+};
+
+/**
+ * Default values for default preferences
+ */
+export const DEFAULT_DEFAULTS: DefaultPreferences = {
+  rackSize_u: 42,
+  rackColorTag: 'blue',
+  deviceManufacturer: 'cisco',
+  cableType: 'cat6',
+  autoSave: true,
+  autoSaveInterval: 5,
+  confirmDelete: true,
+  showWelcomeScreen: true
+};
+
+/**
+ * Default values for view preferences
+ */
+export const DEFAULT_VIEW: ViewPreferences = {
+  sidebarCollapsed: false,
+  showRackLabels: true,
+  showUNumbers: true,
+  showPowerUsage: true,
+  gridView: true,
+  itemsPerPage: 20,
+  defaultSortBy: 'name',
+  defaultSortOrder: 'asc'
+};
+
+/**
+ * Default values for notification preferences
+ */
+export const DEFAULT_NOTIFICATIONS: NotificationPreferences = {
+  enabled: true,
+  showToasts: true,
+  playSound: false,
+  position: 'top-right'
+};
+
 @Entity('user_preferences')
 export class UserPreferences {
   @PrimaryGeneratedColumn('uuid')
@@ -51,28 +101,16 @@ export class UserPreferences {
   @Column({ type: 'uuid', name: 'user_id', unique: true })
   userId!: string;
 
-  @Column({
-    type: 'json',
-    default: () => "'{\"mode\":\"dark\",\"primaryColor\":\"#3b82f6\",\"accentColor\":\"#8b5cf6\",\"fontSize\":\"medium\",\"density\":\"comfortable\"}'"
-  })
+  @Column({ type: 'json' })
   theme!: ThemePreferences;
 
-  @Column({
-    type: 'json',
-    default: () => "'{\"rackSize_u\":42,\"rackColorTag\":\"blue\",\"deviceManufacturer\":\"cisco\",\"cableType\":\"cat6\",\"autoSave\":true,\"autoSaveInterval\":5,\"confirmDelete\":true,\"showWelcomeScreen\":true}'"
-  })
+  @Column({ type: 'json' })
   defaults!: DefaultPreferences;
 
-  @Column({
-    type: 'json',
-    default: () => "'{\"sidebarCollapsed\":false,\"showRackLabels\":true,\"showUNumbers\":true,\"showPowerUsage\":true,\"gridView\":true,\"itemsPerPage\":20,\"defaultSortBy\":\"name\",\"defaultSortOrder\":\"asc\"}'"
-  })
+  @Column({ type: 'json' })
   view!: ViewPreferences;
 
-  @Column({
-    type: 'json',
-    default: () => "'{\"enabled\":true,\"showToasts\":true,\"playSound\":false,\"position\":\"top-right\"}'"
-  })
+  @Column({ type: 'json' })
   notifications!: NotificationPreferences;
 
   @CreateDateColumn({ name: 'created_at' })
